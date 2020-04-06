@@ -1,0 +1,226 @@
+\documentclass[a4paper,titlepage,twocolumn]{book}
+\title{Boolean Functions Course}
+\author{Matan Hamilis}
+\date{April, 2020}
+
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{diagbox}
+\usepackage{hyperref}
+
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+% \usepackage{babel}
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem*{notation}{Notation}
+\newtheorem*{observation}{Observation}
+\newtheorem{example}{Example}[section]
+\newcommand{\exampleautorefname}{Example}
+\newtheorem{claim}{Claim}[section]
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\bftext}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\False}{\bftext{False}}
+\newcommand{\True}{\bftext{True}}
+\newcommand{\Xor}{\bftext{XOR}}
+\newcommand{\half}{\ensuremath{\frac{1}{2}}}
+\newcommand{\fhat}{\ensuremath{\widehat{f}}}
+\newcommand{\fhatparam}[1]{\ensuremath{\fhat\left(#1\right)}}
+\newcommand{\set}[1]{\ensuremath{\left\{#1\right\}}}
+\newcommand{\chis}{\ensuremath{\chi_S}}
+\newcommand{\chisparam}[1]{\ensuremath{\chi_S\left(#1\right)}}
+
+\newcommand{\func}[3]{\ensuremath{#1:#2\rightarrow #3}}
+\newcommand{\MOFunc}[2]{\ensuremath{#1:\MO[#2]\rightarrow \MO}}
+\newcommand{\ZO}[1][]{\ensuremath{\{0,1\}^{#1}}}
+\newcommand{\MO}[1][]{\ensuremath{\{-1,1\}^{#1}}}
+
+\newcommand{\sqbkt}[1][n]{\ensuremath{\left[#1\right]}}
+\newcommand{\innerprod}[2]{\ensuremath{\left<#1,#2\right>}}
+\newcommand{\fourvec}[4]{\ensuremath{\begin{bmatrix}
+			#1 \\
+			#2 \\
+			#3 \\
+			#4 
+\end{bmatrix}}}
+
+
+\newcommand{\ntoone}[1]{\ensuremath{#1:\ZO[n]\rightarrow\ZO}}
+\newcommand{\MOntoone}[1]{\ensuremath{#1:\MO[n]\rightarrow\MO}}
+
+\newcommand{\pair}[2]{\ensuremath{\left(#1,#2\right)}}
+
+\newcommand{\Reals}{\ensuremath{\mathbb{R}}}
+\newcommand{\Naturals}{\ensuremath{\mathbb{N}}}
+\newcommand{\Ftwo}{\ensuremath{\mathbb{F}_2}}
+\newcommand{\Expectation}[2]{\ensuremath{\underset{#1}{\mathbb{E}}\left(#2\right)}}
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\chapter{Introduction}
+	\section{Course Overview}
+	Boolean functions are the most basic topic of study in Computer Science and are widely used in various research fields. The course is mainly going to cover the following topics:
+	\begin{itemize}
+		\item BLR Theorem, from the world of property testing where we try to test whether certain inputs have certain properties in sublinear time (i.e. without going over the entire input).
+		\item Arrow's Theorem, from the world of \emph{Social Choice}. Arrow receive a noble prize for this theorem.
+		\item Goldreich-Levin Theorem, from the world of cryptography (and also relevant to computational learning theory).
+		\item LMN Theorem, relevant to circuit complexity.
+		\item Gaussian Isoperimetric Inequality, relevant to the world of geometry.
+		\item Central Limit Theorem and Invariance Principles from the world of probability.
+		\item CSPs and Inapproximability from the world of computational complexity.
+		\item (Quasi-)Polynomial Freiman-Ruzsa from the world of additive combinatorics.
+		\item KKL Theorem, a theorem from 1998 relevant to boolean functions and hypercontractivity, probability theory and random graphs.
+	\end{itemize}
+\section{Preliminaries}
+	\subsection{Notations}
+	A boolean function is denoted by: \[\ntoone{f}\] 
+	The inputs are $n$ values from \ZO but we can also think in this course of $0$ as \False{} and $1$ as \True. We may also consider the number \ZO{} as real numbers from the set \Reals and sometimes as elements from the finite field \Ftwo. Sometime we may also denote \False{} to be $+1$ while \True{} will be $-1$. The idea behind this is that $-1^{\False} = -1^{-1} = 1$ while $-1 ^ {\True} = -1^{+1} =-1$. Those numbers (i.e \MO) will be usually considered as numbers from \Reals.
+	Therefore we can also think of a boolean function $f$ as a function \[\MOntoone{f}\]
+	However, the representation does not matter for the purpose of the course.
+
+	\subsection{Fourier Expansion}
+	Boolean function analysis is often referred to as a \emph{Fourier Analysis}. Every boolean function has a fourier expansion which means representing the function as a multilinear polynomial. The term \emph{multilinear} means that the power of each variable in each monomial in the polynomial is at most one.
+	\begin{example}
+		\label{and_function_example}
+		The function \[\max{}_2:\MO[2]\rightarrow\MO\] over the variables $x_1$ and $x_2$ defined by the following truth table:
+		\begin{center}
+			\begin{tabular}{| c || c | c|}
+				\hline 
+				\diagbox{$x_1$}{$x_2$} & $-1$ & $1$ \\
+				\hline \hline 
+				$-1$ & $-1$ & $1$ \\
+				\hline 
+				$1$ & $1$ & $1$ \\
+				\hline
+			\end{tabular}
+		\end{center}
+	This function is more known as the \emph{AND} operator and can be represented using the following polynomial:
+	\[max{}_2\left(x_1,x_2\right) = \frac{1}{2} + \frac{1}{2}x_1 +\frac{1}{2}x_2 - \frac{1}{2}x_1x_2 \]
+	\end{example}
+	\begin{notation}
+		The input to a boolean function  will be noted as $x\in \MO[n]$ where $x=\left(x_1,x_2,\ldots,x_n\right)$. 
+	\end{notation}
+\begin{example}
+	Take the majority function of three inputs, so:
+	 \[\MOFunc{Maj{}_3}{3}\] 
+	So for example, we have $Maj{}_3\left(-1,-1,1\right) = -1$ and
+	$Maj{}_3\left(1,-1,1\right) = 1$
+	We can write the function as a polynomial as follows:
+	\[Maj{}_3\left(x\right) = \half x_1 + \half x_2 + \half x_3 - \half x_1 x_2 x_3\]
+\end{example}
+\begin{claim} [Each boolean function can be represented as a multilinear polynomial] 
+	
+	The method is relatively simple. By using interpolation we can, for instance, consider the \emph{AND} function presented in \autoref{and_function_example}. We can simply build the multilinear polynomial as a sum of multilinear polynomials where each multilinear polynomial takes the value of $1$ for one of the inputs and zero for any other input and multiply it by the correct output. For the case of the input where $x_1 = x_2 = 1$ (for which the \emph{AND} function given the output of $1$) we can create the polynomial 
+%	\[\left(\frac{1+x_1}{2}\right)\left(\frac{1+x_2}{2}\right)\left(+1\right)\]
+	This polynomial takes the value of $1$ over the input $\left(1,1\right)$ and zero for the rest possible three inputs. Similarly we can create the rest of the polynomials for the rest of the required output values for each possible input and then sum them up. Since each polynomial will be multilinear, their sum will be multilinear as well.
+
+	Similarly, for the input $\left(1,-1\right)$ we can create the polynomial 
+	\[\left(\frac{1+x_1}{2}\right)\left(\frac{1-x_2}{2}\right)\]
+	This polynomial takes the value of $1$ for the input $\left(1,-1\right)$ and $0$ for the rest of the inputs. We will multiply this polynomial by $-1$ so that the input $\left(1,-1\right)$ will give the output of $-1$ on this polynomial, which is the correct output of the \emph{AND} function on this polynomial as well.
+	
+	For the input \pair{-1}{1} the required output is also $1$ so we get the polynomial
+	\[\left(\frac{1-x_1}{2}\right)\left(\frac{1+x_2}{2}\right)\left(1\right)\]
+	and for the last input \pair{-1}{-1} the required output is $-1$ so we get the polynomial
+		\[\left(\frac{1-x_1}{2}\right)\left(\frac{1-x_2}{2}\right)\left(-1\right)\]
+	If we sum all polynomials, we get the following multilinear polynomial:
+\[
+	\begin{split}
+	  & \left(\frac{1+x_1}{2}\right)\left(\frac{1+x_2}{2}\right)\left(+1\right) \\
+	+ & \left(\frac{1+x_1}{2}\right)\left(\frac{1-x_2}{2}\right)\left(+1\right) \\
+	+ & \left(\frac{1-x_1}{2}\right)\left(\frac{1+x_2}{2}\right)\left(+1\right) \\
+	+ & \left(\frac{1-x_1}{2}\right)\left(\frac{1-x_2}{2}\right)\left(-1\right) \\
+	= & \frac{1}{2} + \frac{1}{2}x_1 +\frac{1}{2}x_2 - \frac{1}{2}x_1x_2
+	\end{split}
+\]
+
+	Similarly for the $Maj_3$ function we can write
+\[
+	\begin{split}
+	Maj{}_3\left(x_1,x_2,x_3\right) & = \\ 
+	 \left(\frac{1+x_1}{2}\right)\left(\frac{1+x_2}{2}\right)\left(\frac{1+x_3}{2}\right)\overbrace{\left(+1\right)}^{Maj{}_3\left(1,1,1\right)}  & + \\
+	 \ldots\text{7 more terms}\ldots & =\\
+	 \half x_1 + \half x_2 + \half x_3 - \half x_1 x_2 x_3 &
+	\end{split}
+\]
+\end{claim}
+
+\begin{observation}
+	Using the interpolation method, we always get a multilinear polynomial.
+\end{observation}
+\begin{observation}
+	This works just as well for functions \func{f}{\MO[n]}{\Reals}, where the image is the set of \Reals. While we will usually be interested in functions with boolean output, this generalization can be useful in the future.
+\end{observation}
+\begin{theorem}
+	Every function \func{f}{\MO[n]}{\Reals} can be uniquely represented by a multilinear polynomial.
+\end{theorem}
+\begin{notation}
+	Given a number $n\in\Naturals$, we denote by \[\sqbkt=\left\{1,2,\ldots,n\right\}\]
+\end{notation}
+\begin{notation}
+	Given a set $S\subseteq\sqbkt$, we denote by \[x^S = \prod_{i\in S}x_i\], when $S=\emptyset$ the product is defined to be $1$.
+\end{notation}
+\begin{notation}
+	For a function \func{f}{\MO[n]}{\Reals} we can generally write $f$ as follows:	
+\[
+	\begin{split}
+	f(x) & = \sum_{S\subseteq \{1,2,\ldots,n\}}c_s\cdot\prod_{i\in S}{x_i} \\
+	& = \sum_{S\subseteq\sqbkt}c_s\cdot x^S 
+	\end{split}
+\]
+	Given a subset $S'\subseteq \sqbkt$ we denote by \fhatparam{S'} the coefficient $c_{S'}$ in the representation above. Notice that \fhat$\left(S'\right) \in \Reals$. Therefore, we can also write $f$ like this:
+	\[f(x) = \sum_{S\subseteq\sqbkt}\fhatparam{S}\cdot x^S\]
+	This is also called the \emph{Fourier Expansion of function $f$}
+	\end{notation}
+
+	We usually think of boolean functions as combinatorial objects and we want to know many combinatorial properties of them. We will see many such properties can be obtain by the coefficients \fhatparam{S}.
+\begin{example}
+	\begin{itemize}
+		\item[]
+		\item $\widehat{\max{}_2}\left(\emptyset\right) = \half$.
+		\item $\widehat{\max{}_2}\left(\set{1}\right) = \half $
+		\item $\widehat{\max{}_2}\left(\set{2}\right) = \half $
+		\item $\widehat{\max{}_2}\left(\set{1,2}\right) = -\half $
+		\item $\widehat{Maj{}_3}\left(\set{1,2}\right) = 0 $
+	\end{itemize} 
+\end{example}
+
+We can think of each monomial as a boolean function of itself.
+\begin{definition}
+	For $S\subseteq\sqbkt$ we define a function \func{\chis}{\MO[n]}{\MO} so that \[\chisparam{x} = \prod_{i\in S}{x_i} = x^S\]
+\end{definition}
+The function \chis{} actually computes the \Xor{} function of the bits $\left(x_i\right)_{i\in S}$.
+	Using the above notation we can represent a boolean function $f$ like this:
+	\[f=\sum_{S\subseteq\sqbkt}{\fhatparam{S}\chis}\]
+	Therefore we can think of any boolean function as a linear combination of the $2^n$ parity functions and we can think of things in a linear algebra perspective. We can think of a function as vector, taking the truth table and "stack" it into a vector in an arbitrary order. For example, for the $\max{}_2$ function we can represent it as a vector in $\Reals^4$ as follows:
+	\[
+	\max{}_2 = \fourvec{1}{1}{1}{-1} = \half\overbrace{\fourvec{1}{1}{1}{1}}^{\chi_\emptyset} + \half\overbrace{\fourvec{1}{-1}{1}{-1}}^{\chi_{1}} +
+	\half\overbrace{\fourvec{1}{1}{-1}{-1}}^{\chi_{2}} +
+	\half\overbrace{\fourvec{1}{-1}{-1}{1}}^{\chi_{1,2}} 
+	\]
+	Notice that the first entry in the vector represents corresponding to the  input \pair{1}{1}, the second for \pair{-1}{1}, the third \pair{1}{-1} and the last \pair{-1}{-1}, but this ordering is arbitrary and has no meaning.
+	
+	Thus, we have represented the $\max{}_2$  function as a linear combination of the $\chi_S$ functions for all $S \subseteq \MO$. Moreover, we can represent this way any function \func{f}{\MO[2]}{\Reals}.
+\subsection{Linear Algebra}
+	Let $V$ be the vector space of functions \func{f}{\MO[n]}{\Reals} which is equal to the space $\Reals^{2^n}$. We have $\dim\left(V\right) = 2^n$.
+	
+	\begin{claim}
+		The parity functions $\left\{\chis\right\}_{S\subseteq \sqbkt}$ span V.
+	\end{claim}
+	This is because we have seen we can represent each function as a linear combination of the \chis functions.
+	Since there are $2^n$ parity functions and they are linearly independent and a basis for $V$. With this basis there is a single linear combination to represent each element (function) in this space, and thus each function has a unique representation.
+	\begin{definition}
+		The inner product in $V$, denoted by $\left<\cdot,\cdot\right>$ is the usual inner product on $V \cong \Reals^{2^n}$, but times $2^{-n}$.
+	\end{definition}
+	Therefore, given two functions \func{f,g}{\MO[n]}{\Reals}, we have 
+	\[
+	\innerprod{f}{g} = 2^{-n} \cdot \sum_{x\in \MO[n]}f\left(x\right)\cdot g\left(x\right)
+	\]
+	We can think of the multiplication by $2^{-n}$ as an average.
+	We can give the inner product a probablistic meaning by defining the inner product \[\innerprod{f}{g} = \Expectation{x \sim \MO[n]}{f\left(x\right)\cdot g\left(x\right)}\].
+\end{document}
+	
+
+
